@@ -1,0 +1,83 @@
+importing the required package
+```{r}
+require(tidyverse)
+
+mydata <- read.csv("C:/Users/himanshu/Desktop/R analysis/mlb1.csv")
+```
+
+```{r}
+temp <- rowSums(mydata[c("frstbase", "scndbase", "shrtstop", "thrdbase", "outfield", "catcher")])
+min(temp)
+max(temp)
+```
+As the result is 1 for both min and max values, we have confirmed that every player has been assigned exactly one position.
+
+lets create two variables "position" and "race" which summerizes the respective information in one variable.
+
+```{r}
+mydata$position <- "First Base"
+mydata$position[mydata$scndbase == 1] <- "Second Base"
+mydata$position[mydata$shrtstop == 1] <- "Short Stop"
+mydata$position[mydata$thrdbase == 1] <- "Third Base"
+mydata$position[mydata$outfield == 1] <- "Outfield"
+mydata$position[mydata$catcher == 1] <- "Catcher"
+# ensure it is a factor variable
+mydata$position <- as.factor(mydata$position)
+
+
+mydata$race <- "White"
+mydata$race[mydata$hispan == 1] <- "Hispanic"
+mydata$race[mydata$black == 1] <- "Black"
+mydata$race <- as.factor(mydata$race)
+
+summary(mydata$position)
+summary(mydata$race)
+summary(mydata$salary)
+```
+
+we can get mean, median, sd, max, min, variance by directly using the funtions.
+
+# First Pipe
+```{r}
+mydata %>% group_by(position) %>% summarise(mean(salary))
+```
+%>% is the piping operator
+
+```{r}
+mydata %>% group_by(position) %>% summarise(number = length(salary), avg.salary = mean(salary))
+```
+
+
+## filter()
+
+```{r}
+mydata %>% filter(yrsallst == 0) %>% group_by(position) %>% summarise(number = length(salary), avg.salary = mean(salary))
+```
+
+
+## arrange()
+
+```{r}
+mydata %>% filter(yrsallst == 0) %>% group_by(position) %>% summarise(number = length(salary), avg.salary = mean(salary)) %>% arrange(avg.salary)
+
+```
+
+## double pivot tables
+
+```{r}
+mydata %>% group_by(position, race) %>% summarise(avg.salary = mean(salary))
+```
+
+
+## spread() and arrange()
+
+```{r}
+mydata %>% group_by(position, race) %>% summarise(avg.salary = mean(salary)) %>% spread(race, avg.salary)
+```
+
+```{r}
+mydata$AS <- (mydata$yrsallst>0)
+
+mydata %>% group_by(AS, position, race) %>% summarise(avg.salary = mean(salary)) %>% spread(race, avg.salary) %>% arrange(AS)
+```
+
